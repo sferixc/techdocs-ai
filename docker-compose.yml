@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: techdocs-postgres
+    environment:
+      POSTGRES_DB: techdocs_ai
+      POSTGRES_USER: techdocs
+      POSTGRES_PASSWORD: techdocs
+    ports:
+      - "5433:5432"
+    volumes:
+      - techdocs_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  techdocs_postgres_data:

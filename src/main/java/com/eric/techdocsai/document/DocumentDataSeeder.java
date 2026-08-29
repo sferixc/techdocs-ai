@@ -1,5 +1,7 @@
 package com.eric.techdocsai.document;
 
+import com.eric.techdocsai.embedding.OllamaEmbeddingClient;
+import com.eric.techdocsai.embedding.OllamaEmbeddingResponse;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -7,13 +9,20 @@ import org.springframework.stereotype.Component;
 public class DocumentDataSeeder implements CommandLineRunner {
 
 	private final DocumentRepository documentRepository;
+	private final OllamaEmbeddingClient ollamaEmbeddingClient;
 
-	public DocumentDataSeeder(DocumentRepository documentRepository) {
+	public DocumentDataSeeder(DocumentRepository documentRepository, OllamaEmbeddingClient ollamaEmbeddingClient) {
 		this.documentRepository = documentRepository;
+		this.ollamaEmbeddingClient = ollamaEmbeddingClient;
 	}
 
 	@Override
 	public void run(String... args) {
+
+		OllamaEmbeddingResponse responseObject =  ollamaEmbeddingClient.createEmbedding("something sum sum");
+
+		System.out.println(responseObject.embeddings().get(0).size());
+
 		if (documentRepository.count() > 0) {
 			return;
 		}

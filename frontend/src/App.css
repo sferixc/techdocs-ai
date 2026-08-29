@@ -1,4 +1,13 @@
 main {
-    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px;
     font-family: system-ui, sans-serif;
+}
+
+article {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 12px;
 }

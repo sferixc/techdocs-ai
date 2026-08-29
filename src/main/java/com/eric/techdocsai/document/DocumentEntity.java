@@ -16,7 +16,7 @@ public class DocumentEntity {
 
 	private String author;
 
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private DocumentFileType fileType;
 
 	private String sourcePath;

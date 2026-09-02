@@ -73,4 +73,8 @@ public class DocumentEntity {
 		return chunks;
 	}
 
+	public void addChunk(DocumentChunkEntity chunk) {
+		chunks.add(chunk);
+	}
+
 }

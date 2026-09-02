@@ -16,7 +16,9 @@ public class DocumentChunkEntity {
 	@Column(columnDefinition = "TEXT")
 	private String content;
 
-	private Integer pageNumber;
+	private Integer startPage;
+
+	private Integer endPage;
 
 	private String sectionTitle;
 
@@ -31,22 +33,24 @@ public class DocumentChunkEntity {
 	protected DocumentChunkEntity() {
 	}
 
-	public DocumentChunkEntity(
-			DocumentEntity document,
-			int chunkIndex,
-			String content,
-			Integer pageNumber,
-			String sectionTitle,
-			int wordCount
-	) {
-		this.document = document;
-		this.chunkIndex = chunkIndex;
-		this.content = content;
-		this.pageNumber = pageNumber;
-		this.sectionTitle = sectionTitle;
-		this.wordCount = wordCount;
-		this.createdAt = Instant.now();
-	}
+		public DocumentChunkEntity(
+				DocumentEntity document,
+				int chunkIndex,
+				String content,
+				Integer startPage,
+				Integer endPage,
+				String sectionTitle,
+				int wordCount
+		) {
+			this.document = document;
+			this.chunkIndex = chunkIndex;
+			this.content = content;
+			this.startPage = startPage;
+			this.endPage = endPage;
+			this.sectionTitle = sectionTitle;
+			this.wordCount = wordCount;
+			this.createdAt = Instant.now();
+		}
 
 	public Long getId() {
 		return id;
@@ -60,8 +64,12 @@ public class DocumentChunkEntity {
 		return content;
 	}
 
-	public Integer getPageNumber() {
-		return pageNumber;
+	public Integer getStartPage() {
+		return startPage;
+	}
+
+	public Integer getEndPage() {
+		return endPage;
 	}
 
 	public String getSectionTitle() {

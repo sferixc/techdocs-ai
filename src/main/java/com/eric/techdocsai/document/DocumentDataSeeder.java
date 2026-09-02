@@ -3,13 +3,22 @@ package com.eric.techdocsai.document;
 import com.eric.techdocsai.embedding.OllamaEmbeddingClient;
 import com.eric.techdocsai.embedding.OllamaEmbeddingResponse;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class DocumentDataSeeder implements CommandLineRunner {
 
 	private final DocumentRepository documentRepository;
 	private final OllamaEmbeddingClient ollamaEmbeddingClient;
+	private final PdfDocumentParser pdfDocumentParser = new PdfDocumentParser();
+	private final TextChunker textChunker = new TextChunker();
+
 
 	public DocumentDataSeeder(DocumentRepository documentRepository, OllamaEmbeddingClient ollamaEmbeddingClient) {
 		this.documentRepository = documentRepository;
@@ -19,67 +28,35 @@ public class DocumentDataSeeder implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 
-		OllamaEmbeddingResponse responseObject =  ollamaEmbeddingClient.createEmbedding("something sum sum");
+		List<ParsedPage> pages = new ArrayList<>();
 
-		System.out.println(responseObject.embeddings().get(0).size());
+		Resource resource = new ClassPathResource("useful_ml.pdf");
+		try{
+			pages = pdfDocumentParser.parse(resource);
+		}
+		catch (IOException e){
 
-		if (documentRepository.count() > 0) {
-			return;
 		}
 
-		DocumentEntity springDocument = new DocumentEntity(
-				"Spring Framework Reference",
-				"Spring Team",
-				DocumentFileType.HTML,
-				"preloaded/spring-framework-reference.html",
-				12450
-		);
+		List<TextChunk> chunks = textChunker.chunk(pages);
 
-		springDocument.getChunks().add(new DocumentChunkEntity(
-				springDocument,
-				0,
-				"Dependency injection is a design pattern where an object receives its dependencies from an external source instead of creating them itself.",
-				null,
-				"Core Technologies - Dependency Injection",
-				21
-		));
+		DocumentEntity document = new DocumentEntity();
 
-		springDocument.getChunks().add(new DocumentChunkEntity(
-				springDocument,
-				1,
-				"The Spring IoC container is responsible for instantiating, configuring, and assembling application objects known as beans.",
-				null,
-				"Core Technologies - IoC Container",
-				17
-		));
+		int index = 0;
 
-		DocumentEntity mathDocument = new DocumentEntity(
-				"Linear Algebra Notes",
-				"Course Staff",
-				DocumentFileType.PDF,
-				"preloaded/linear-algebra-notes.pdf",
-				8300
-		);
+		for(TextChunk chunk : chunks){
+			DocumentChunkEntity chunkEntity = new DocumentChunkEntity(
+					document, chunk.chunkIndex(), chunk.content()
+					,chunk.startPage(), chunk.endPage(), "", chunk.wordCount()
+			); //leave out section title for now for testing purposes
 
-		mathDocument.getChunks().add(new DocumentChunkEntity(
-				mathDocument,
-				0,
-				"A vector space is a set of objects called vectors, together with operations of addition and scalar multiplication.",
-				3,
-				"Vector Spaces",
-				18
-		));
+			document.addChunk(chunkEntity);
 
-		mathDocument.getChunks().add(new DocumentChunkEntity(
-				mathDocument,
-				1,
-				"A matrix transformation maps vectors from one vector space to another while preserving linear combinations.",
-				8,
-				"Linear Transformations",
-				15
-		));
+		}
 
-		documentRepository.save(springDocument);
-		documentRepository.save(mathDocument);
+		documentRepository.save(document);
+
+
+
 	}
 }

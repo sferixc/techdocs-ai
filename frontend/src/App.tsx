@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import './App.css';
 
 type DocumentSearchResult = {
@@ -11,9 +11,9 @@ type DocumentSearchResult = {
     similarity: number;
 };
 
-type Querystring = {
-    query: string;
-}
+// type queryString = {
+//     query: string;
+// }
 
 function App(){
     const[documents, setDocuments] = useState<DocumentSearchResult[]>([]);
@@ -21,10 +21,17 @@ function App(){
     const [searching, setSearching] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+
+
     async function loadDocuments() {
+
+        setSearching(true);
+        setError(null);
+        setDocuments([]);
+
         try{
             const response = await fetch(
-                'http://localhost:8080/search',
+                'http://localhost:8080/api/documents/search',
                 {
                     method: 'POST',
                     headers: {
@@ -57,6 +64,31 @@ function App(){
         <main>
             <h1>TechDocs AI</h1>
 
+            <form onSubmit={(e) => {
+                e.preventDefault();
+
+                loadDocuments();
+            }}>
+
+                <input placeholder = "search" type = "text"
+                value = {queryString}
+                onChange = {(e) => setQueryString(e.target.value)}>
+                </input>
+
+                <button type = "submit" disabled = {searching || !queryString.trim()}>
+                    {searching ? "Searching..." : "Search"}
+                </button>
+
+            </form>
+
+            {error && <p>{error}</p>}
+
+            {documents.length > 0 && (documents.map((document) => (
+                <div key = {document.chunkId}>
+                    <h2>{document.documentTitle}</h2>
+                    <p>{document.content}</p>
+                </div>
+            )))}
 
 
         </main>

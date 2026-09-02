@@ -93,6 +93,19 @@ public class TextChunker {
 
 		}
 
+		if (currentWordCount > 0) {
+			chunks.add(new TextChunk(
+					chunks.size(),
+					currentChunk.toString(),
+					chunkStartPage,
+					chunkEndPage,
+					currentWordCount
+			));
+		}
+
+		return chunks;
+
+
 	}
 
 	private String normalizeWhitespace(String text) {

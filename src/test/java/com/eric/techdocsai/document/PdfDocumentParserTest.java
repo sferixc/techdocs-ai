@@ -6,8 +6,9 @@ import org.springframework.core.io.ClassPathResource;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PdfDocumentParserTest {
 
@@ -36,5 +37,30 @@ class PdfDocumentParserTest {
 		Files.writeString(destination, output, StandardCharsets.UTF_8);
 
 		System.out.println("Text saved in " + destination.toAbsolutePath());
+	}
+
+	@Test
+	void keepsSentenceTogetherAcrossPages() {
+		var pages = List.of(
+				new ParsedPage(1, "Machine learning models learn"),
+				new ParsedPage(2, "from examples.")
+		);
+
+		var chunks = new TextChunker().chunk(pages);
+
+		assertEquals(1, chunks.size());
+
+		TextChunk chunk = chunks.getFirst();
+
+		assertAll(
+				() -> assertEquals(
+						"Machine learning models learn from examples.",
+						chunk.content()
+				),
+				() -> assertEquals(0, chunk.chunkIndex()),
+				() -> assertEquals(1, chunk.startPage()),
+				() -> assertEquals(2, chunk.endPage()),
+				() -> assertEquals(6, chunk.wordCount())
+		);
 	}
 }

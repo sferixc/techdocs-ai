@@ -1,6 +1,10 @@
 package com.eric.techdocsai.document;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Array;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.Instant;
 
 @Entity
@@ -24,6 +28,11 @@ public class DocumentChunkEntity {
 
 	private int wordCount;
 
+	@JdbcTypeCode(SqlTypes.VECTOR)
+	@Array(length = 768)
+	@Column(name = "embedding")
+	private float[] embedding;
+
 	private Instant createdAt;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -40,7 +49,8 @@ public class DocumentChunkEntity {
 				Integer startPage,
 				Integer endPage,
 				String sectionTitle,
-				int wordCount
+				int wordCount,
+				float[] embedding
 		) {
 			this.document = document;
 			this.chunkIndex = chunkIndex;
@@ -50,6 +60,7 @@ public class DocumentChunkEntity {
 			this.sectionTitle = sectionTitle;
 			this.wordCount = wordCount;
 			this.createdAt = Instant.now();
+			this.embedding = embedding;
 		}
 
 	public Long getId() {
@@ -86,5 +97,9 @@ public class DocumentChunkEntity {
 
 	public DocumentEntity getDocument() {
 		return document;
+	}
+
+	public void setEmbedding(float[] embedding) {
+		this.embedding = embedding;
 	}
 }

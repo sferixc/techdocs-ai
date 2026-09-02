@@ -28,6 +28,8 @@ public class DocumentDataSeeder implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 
+		if(documentRepository.count() > 0) return;
+
 		List<ParsedPage> pages = new ArrayList<>();
 
 		Resource resource = new ClassPathResource("useful_ml.pdf");
@@ -35,20 +37,34 @@ public class DocumentDataSeeder implements CommandLineRunner {
 			pages = pdfDocumentParser.parse(resource);
 		}
 		catch (IOException e){
-
+			throw new IllegalStateException("Could not parse useful_ml.pdf", e);
 		}
 
 		List<TextChunk> chunks = textChunker.chunk(pages);
 
-		DocumentEntity document = new DocumentEntity();
+		int totalWords = chunks.stream()
+				.mapToInt(TextChunk::wordCount)
+				.sum();
+
+		DocumentEntity document = new DocumentEntity(
+				"A Few Useful Things to Know about Machine Learning",
+				"Pedro Domingos",
+				DocumentFileType.PDF,
+				"useful_ml.pdf",
+				totalWords
+		);
 
 		int index = 0;
 
 		for(TextChunk chunk : chunks){
 			DocumentChunkEntity chunkEntity = new DocumentChunkEntity(
 					document, chunk.chunkIndex(), chunk.content()
-					,chunk.startPage(), chunk.endPage(), "", chunk.wordCount()
+					,chunk.startPage(), chunk.endPage(), "", chunk.wordCount(), null
 			); //leave out section title for now for testing purposes
+
+			OllamaEmbeddingResponse response = ollamaEmbeddingClient.createEmbedding(chunk.content());
+
+			chunkEntity.setEmbedding(response.embeddings()[0]);
 
 			document.addChunk(chunkEntity);
 
@@ -59,4 +75,5 @@ public class DocumentDataSeeder implements CommandLineRunner {
 
 
 	}
+
 }

@@ -27,14 +27,13 @@ public class DocumentEmbeddingService {
 
 			if (response == null
 					|| response.embeddings() == null
-					|| response.embeddings().size() != 1
-					|| response.embeddings().getFirst() == null
-					|| response.embeddings().getFirst().isEmpty()) {
+					|| response.embeddings()[0].length != 1
+					|| response.embeddings()[0]== null){
 				throw new IllegalStateException(
 						"Missing embedding for chunk " + chunk.chunkIndex()
 				);
 			}
-			results.add(new EmbeddedChunk(chunk, response.embeddings().get(0))); //because response has List<List<Double>>
+			results.add(new EmbeddedChunk(chunk, response.embeddings()[0])); //because response has List<List<Double>>
 		}
 
 		return results;

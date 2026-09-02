@@ -6,6 +6,6 @@ import java.util.List;
 
 public record EmbeddedChunk(
 		TextChunk chunk,
-		List<Double> embedding
+		float[] embedding
 ) {
 }

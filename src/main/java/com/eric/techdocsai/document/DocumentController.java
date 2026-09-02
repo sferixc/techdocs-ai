@@ -1,9 +1,7 @@
 package com.eric.techdocsai.document;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -14,9 +12,11 @@ import java.util.List;
 public class DocumentController {
 
 	private DocumentRepository documentRepository;
+	private DocumentSearchService documentSearchService;
 
-	public DocumentController(DocumentRepository documentRepository) {
+	public DocumentController(DocumentRepository documentRepository, DocumentSearchService documentSearchService) {
 		this.documentRepository = documentRepository;
+		this.documentSearchService = documentSearchService;
 	}
 
 	@GetMapping
@@ -26,6 +26,11 @@ public class DocumentController {
 				.sorted(Comparator.comparing(DocumentEntity::getCreatedAt).reversed())
 				.map(DocumentSummaryResponse::fromEntity)
 				.toList();
+	}
+
+	@PostMapping("/search")
+	public List<DocumentSearchResult> search(@Valid @RequestBody DocumentSearchRequest request) {
+		return documentSearchService.search(request.query());
 	}
 
 }

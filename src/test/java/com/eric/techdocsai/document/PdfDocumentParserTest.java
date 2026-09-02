@@ -63,4 +63,39 @@ class PdfDocumentParserTest {
 				() -> assertEquals(6, chunk.wordCount())
 		);
 	}
+
+	@Test
+	void startsNewChunkBeforeExceedingWordLimit() {
+		String firstSentence = "word ".repeat(239) + "ends.";
+		String secondSentence = "Another sentence has five words.";
+
+		var pages = List.of(
+				new ParsedPage(
+						1,
+						firstSentence + " "
+								+ secondSentence + " "
+								+ secondSentence + " "
+								+ secondSentence
+				)
+		);
+
+		var chunks = new TextChunker().chunk(pages);
+
+		assertEquals(2, chunks.size());
+
+		assertAll(
+				() -> assertEquals(250, chunks.get(0).wordCount()),
+				() -> assertEquals(5, chunks.get(1).wordCount()),
+				() -> assertEquals(
+						firstSentence + " "
+								+ secondSentence + " "
+								+ secondSentence,
+						chunks.get(0).content()
+				),
+				() -> assertEquals(
+						secondSentence,
+						chunks.get(1).content()
+				)
+		);
+	}
 }

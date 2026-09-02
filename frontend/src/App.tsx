@@ -1,57 +1,64 @@
 import {useEffect, useState} from "react";
 import './App.css';
 
-type DocumentSummary = {
-    id: number;
-    title: string;
-    author: string;
-    fileType: string;
-    sourcePath: string;
-    wordCount: number;
-    createdAt: string;
+type DocumentSearchResult = {
+    documentId: number;
+    documentTitle: string;
+    chunkId: number;
+    content: string;
+    startPage: number | null;
+    endPage: number | null;
+    similarity: number;
 };
 
-function App(){
-    const[documents, setDocuments] = useState<DocumentSummary[]>([]);
-    const[loading, setLoading] = useState<boolean>(true);
+type Querystring = {
+    query: string;
+}
 
-    useEffect(() => {
-        async function loadDocuments() {
-            const response = await fetch('http://localhost:8080/api/documents');
+function App(){
+    const[documents, setDocuments] = useState<DocumentSearchResult[]>([]);
+    const[queryString, setQueryString] = useState('');
+    const [searching, setSearching] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    async function loadDocuments() {
+        try{
+            const response = await fetch(
+                'http://localhost:8080/search',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: queryString.trim(),
+                    })
+                });
+
+            if(!response.ok) throw new Error(
+                `HTTP error! status: ${response.status}`
+            )
+
             const data = await response.json();
 
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            setLoading(false);
             setDocuments(data);
-
+        }
+        catch (error) {
+            setError(
+                error instanceof Error ? error.message : "Search failed."
+            );
+        } finally {
+            setSearching(false);
         }
 
-        loadDocuments();
-
-    }, []);
+    }
 
     return (
         <main>
             <h1>TechDocs AI</h1>
 
-            <h2>Preloaded documents</h2>
 
-            {loading && <p>Loading documents...</p>}
 
-            {!loading && documents.length === 0 && (
-                <p>No documents found.</p>
-            )}
-
-            {!loading && documents.map((document) => (
-                <article key={document.id}>
-                    <h3>{document.title}</h3>
-                    <p>Author: {document.author}</p>
-                    <p>Type: {document.fileType}</p>
-                    <p>Words: {document.wordCount}</p>
-                    <p>Source: {document.sourcePath}</p>
-                </article>
-            ))}
         </main>
     );
 }

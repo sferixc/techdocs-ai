@@ -14,13 +14,13 @@ function pageLabel(startPage: number | null, endPage: number | null) {
 }
 
 type DocumentSummary = {
-    documentId: number;
+    id: number;
+    title: string;
     wordCount: number;
     fileType: string;
     author: string;
-    documentTitle: string;
-    chunkId: number;
-    content: string;
+    sourcePath: string;
+    createdAt: string;
 }
 
 type DocumentSearchResult = {
@@ -53,9 +53,9 @@ function App(){
 
         try{
             const response = await fetch(API_URL);
-            if(!response.ok)(
+            if(!response.ok) throw new Error(
                 `HTTP error! status: ${response.status}`
-            )
+            );
             const data = await response.json();
             setDocumentSummaries(data);
         }
@@ -66,6 +66,8 @@ function App(){
     }
 
     async function search(query: string) {
+        const trimmedQuery = query.trim();
+        if (!trimmedQuery) return;
 
         setSearching(true);
         setError(null);
@@ -80,7 +82,7 @@ function App(){
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        query: query.trim(),
+                        query: trimmedQuery,
                     })
                 });
 
@@ -90,7 +92,7 @@ function App(){
 
             const data = await response.json();
 
-            setSubmittedQuery(query);
+            setSubmittedQuery(trimmedQuery);
             setDocuments(data);
         }
         catch (error) {
@@ -130,11 +132,10 @@ function App(){
                 <section  className="search-section" aria-labelledby="search-title">
                     <p className="eyebrow">Semantic research search</p>
                     <h1 id="search-title">Find the idea, not just the keyword.</h1>
-                    <p className="intro">Search foundational papers on retrieval, embeddings and retrieval-augmented generation.</p>\
+                    <p className="intro">Search foundational papers on retrieval, embeddings and retrieval-augmented generation.</p>
 
                     <form className="search-form" onSubmit={handleNormalSearch}>
-                        <span className="search-icon" aria-hidden="true">⌕</span>
-                        <input placeholder = "Search for papers..." onChange={(e) => {
+                        <input placeholder = "Search for papers..." value={queryString} onChange={(e) => {
                             setQueryString(e.target.value);
                         }}/>
                         <button type = "submit" disabled = {searching || !queryString.trim()}>
@@ -142,10 +143,10 @@ function App(){
                         </button>
                     </form>
 
-                    <div>
+                    <div className="suggestions">
                         <span>Try</span>
                         {suggestedQueries.map((suggestion) => (
-                            <button key = {suggestion} onClick={() => handleSuggestionSearch(suggestion)}>{suggestion}</button>
+                            <button type="button" key = {suggestion} onClick={() => handleSuggestionSearch(suggestion)}>{suggestion}</button>
                         ))}
                     </div>
 
@@ -192,9 +193,9 @@ function App(){
 
                         <div className = "document-grid">
                             {documentSummaries.map((document, index) => (
-                                <article className="document-card" key={document.documentId}>
+                                <article className="document-card" key={document.id}>
                                     <div className={`paper-icon tone-${index % 4}`} aria-hidden="true"><span>PDF</span></div>
-                                    <div><p className="document-kind">Research paper</p><h3>{document.documentTitle}</h3><p className="document-author">{document.author === 'Unknown' ? 'Machine learning research' : document.author}</p></div>
+                                    <div><p className="document-kind">Research paper</p><h3>{document.title}</h3><p className="document-author">{document.author === 'Unknown' ? 'Machine learning research' : document.author}</p></div>
                                     <div className="document-footer"><span>{document.wordCount.toLocaleString()} words</span><span>{document.fileType}</span></div>
                                 </article>
                             ))}

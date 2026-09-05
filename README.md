@@ -4,6 +4,14 @@ An application for semantic search across technical documentation and PDF papers
 
 The project is under development. The current version implements text extraction, chunking, embedding generation, storage, and vector search, along with an interface for browsing the library and viewing results.
 
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/images/Home%20Screen.png" alt="Document library" width="45%">
+  <img src="docs/images/Search%20Response.png" alt="Search results" width="45%">
+</p>
+
 ## Implemented features
 
 - Document library displaying titles, authors, file types, and word counts.
@@ -64,7 +72,7 @@ Once PostgreSQL is ready, enable the vector extension in the application databas
 docker compose exec postgres psql -U techdocs -d techdocs_ai -c "CREATE EXTENSION IF NOT EXISTS vector;"
 ```
 
-The local configuration in `docker-compose.yml` and `application.properties` uses the `techdocs_ai` database, with `techdocs` as both username and password, on port `5433`. Data persists in the `techdocs_postgres_data` Docker volume.
+The local configuration in `docker-compose.yml` and `application.properties` uses the `techdocs_ai` database, with `techdocs` as both username and password, on port `5433`. These are development-only example credentials. Docker binds the database port to `127.0.0.1`, making it accessible only from the host. Data persists in the `techdocs_postgres_data` Docker volume.
 
 ### 2. Ollama
 

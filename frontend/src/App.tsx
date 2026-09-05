@@ -122,7 +122,7 @@ function App(){
 
             <header className = "header">
                 <div className = "brandmark"><div className = "logo">
-                    <img src = "logo.png" alt = "logo" />
+
                 </div>
 
                 </div>
